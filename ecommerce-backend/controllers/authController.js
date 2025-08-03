@@ -14,7 +14,7 @@ exports.signup = async (req, res) => {
   const user = await User.create({ name, email, password });
   const emailToken = createToken(user._id);
 
-  const url = `http://localhost:5000/api/auth/verify/${emailToken}`;
+  const url = `http://localhost:5000/auth/verify/${emailToken}`;
   await sendEmail(email, 'Verify your email', `<a href="${url}">Click to verify</a>`);
 
   res.status(201).json({ message: 'Signup success! Check email to verify.' });
