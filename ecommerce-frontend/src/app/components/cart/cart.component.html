@@ -1,0 +1,41 @@
+<h2>Your Cart</h2>
+
+<div *ngIf="cartItems.length === 0">
+  <p>Your cart is empty.</p>
+</div>
+
+<div *ngIf="cartItems.length > 0">
+  <table>
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Price</th>
+        <th>Quantity</th>
+        <th>Total</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of cartItems">
+        <td>{{ item.product.name }}</td>
+        <td>${{ item.product.price }}</td>
+        <td>
+          <input
+            #qtyInput
+            type="number"
+            min="1"
+            [value]="item.quantity"
+            (change)="updateQuantity(item, qtyInput.value)"
+          />
+        </td>
+        <td>${{ item.product.price * item.quantity }}</td>
+        <td>
+          <button (click)="removeItem(item)">Remove</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Total: ${{ getTotal() }}</h3>
+  <button (click)="clearCart()">Clear Cart</button>
+</div>

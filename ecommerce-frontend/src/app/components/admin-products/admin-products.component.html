@@ -1,0 +1,39 @@
+<h2>Manage Products</h2>
+
+<form (submit)="addProduct(); $event.preventDefault()">
+  <h3>Add New Product</h3>
+  <input type="text" [(ngModel)]="newProduct.name" name="name" placeholder="Name" required />
+  <input type="text" [(ngModel)]="newProduct.image" name="image" placeholder="Image URL" required />
+  <input type="text" [(ngModel)]="newProduct.category" name="category" placeholder="Category" required />
+  <input type="number" [(ngModel)]="newProduct.quantity" name="quantity" placeholder="Quantity" required />
+  <input type="number" [(ngModel)]="newProduct.price" name="price" placeholder="Price" required />
+  <input type="text" [(ngModel)]="newProduct.barId" name="barId" placeholder="Barcode ID" required />
+  <label>
+    <input type="checkbox" [(ngModel)]="newProduct.inStock" name="inStock" />
+    In Stock
+  </label>
+  <button type="submit">Add</button>
+</form>
+
+<table *ngIf="products.length > 0">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Category</th>
+      <th>Quantity</th>
+      <th>Price</th>
+      <th>In Stock</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let p of products">
+      <td>{{ p.name }}</td>
+      <td>{{ p.category }}</td>
+      <td>{{ p.quantity }}</td>
+      <td>{{ p.price }}</td>
+      <td>{{ p.inStock }}</td>
+      <td><button (click)="deleteProduct(p._id!)">Delete</button></td>
+    </tr>
+  </tbody>
+</table>

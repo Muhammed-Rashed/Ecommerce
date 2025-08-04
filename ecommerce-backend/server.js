@@ -9,6 +9,12 @@ const cartRoutes = require('./routes/cart');
 dotenv.config();
 const app = express();
 app.use(express.json());
+const cors = require('cors');
+
+app.use(cors({
+  origin: 'http://localhost:4200', // frontend URL
+  credentials: true
+}));
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected'))

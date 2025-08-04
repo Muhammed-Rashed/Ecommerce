@@ -1,0 +1,24 @@
+.card {
+  border: 1px solid #ccc;
+  padding: 12px;
+  border-radius: 6px;
+  max-width: 250px;
+  text-align: center;
+  box-shadow: 1px 1px 5px #ddd;
+}
+
+.card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.info h3 {
+  margin: 10px 0 5px;
+}
+
+.out-of-stock {
+  color: red;
+  font-weight: bold;
+}

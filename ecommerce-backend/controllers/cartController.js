@@ -2,7 +2,17 @@ const Cart = require('../models/Cart');
 
 exports.getCart = async (req, res) => {
   const cart = await Cart.findOne({ userId: req.user._id }).populate('items.productId');
-  res.json(cart || { userId: req.user._id, items: [] });
+
+  if (!cart) return res.json([]);
+
+  const items = cart.items.map(i => ({
+    _id: i._id,
+    product: i.productId,
+    quantity: i.quantity,
+    userId: cart.userId
+  }));
+
+  res.json(items);
 };
 
 exports.addToCart = async (req, res) => {

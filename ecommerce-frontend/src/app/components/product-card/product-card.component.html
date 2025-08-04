@@ -1,0 +1,11 @@
+<div class="card">
+  <img [src]="product.image" alt="{{ product.name }}" />
+  <div class="info">
+    <h3>{{ product.name }}</h3>
+    <p>Category: {{ product.category }}</p>
+    <p>Price: ${{ product.price }}</p>
+    <p *ngIf="product.quantity > 0">In stock</p>
+    <p *ngIf="product.quantity === 0" class="out-of-stock">Out of stock</p>
+    <button>Add to Cart</button>
+  </div>
+</div>
