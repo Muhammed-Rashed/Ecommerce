@@ -6,6 +6,7 @@ export interface User {
   _id?: string;
   name: string;
   email: string;
+  role: string;
   isAdmin: boolean;
   isVerified: boolean;
   createdAt?: Date;
@@ -31,8 +32,8 @@ export class UserService {
     return this.http.get<User>(`${this.apiUrl}/profile`, { headers: this.getHeaders() });
   }
 
-  updateProfile(userData: Partial<User>): Observable<User> {
-    return this.http.put<User>(`${this.apiUrl}/profile`, userData, { headers: this.getHeaders() });
+  updateProfile(userData: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/profile`, userData, { headers: this.getHeaders() });
   }
 
   deleteProfile(): Observable<any> {

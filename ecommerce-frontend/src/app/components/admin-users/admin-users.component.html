@@ -1,26 +1,156 @@
-<div class="container">
-  <h2>Manage Users</h2>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-4">
+        <i class="fas fa-users"></i> User Management
+      </h2>
 
-  <input class="form-control my-2" [(ngModel)]="searchName" placeholder="Search by name">
-  <button class="btn btn-primary mb-3" (click)="searchUsers()">Search</button>
+      <!-- Search and Filter Section -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-8">
+              <div class="input-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Search by name or email..."
+                  [(ngModel)]="searchName"
+                  (input)="searchUsers()"
+                  name="searchName">
+                <button 
+                  class="btn btn-outline-secondary" 
+                  type="button" 
+                  (click)="clearSearch()"
+                  *ngIf="searchName">
+                  <i class="fas fa-times"></i>
+                </button>
+                <button 
+                  class="btn btn-primary" 
+                  type="button" 
+                  (click)="searchUsers()">
+                  <i class="fas fa-search"></i> Search
+                </button>
+              </div>
+            </div>
+            <div class="col-md-4 text-end">
+              <button class="btn btn-success" (click)="loadUsers()">
+                <i class="fas fa-sync-alt"></i> Refresh
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
-  <table class="table table-bordered">
-    <thead>
-      <tr>
-        <th>Name</th><th>Email</th><th>Admin</th><th>Verified</th><th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let user of users">
-        <td><input [(ngModel)]="user.name" class="form-control"></td>
-        <td><input [(ngModel)]="user.email" class="form-control"></td>
-        <td><input type="checkbox" [(ngModel)]="user.isAdmin"></td>
-        <td>{{ user.isVerified ? '✔️' : '❌' }}</td>
-        <td>
-          <button class="btn btn-success btn-sm me-2" (click)="updateUser(user)">Update</button>
-          <button class="btn btn-danger btn-sm" (click)="deleteUser(user._id)">Delete</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+      <!-- Error Message -->
+      <div class="alert alert-danger" *ngIf="errorMessage">
+        <i class="fas fa-exclamation-triangle"></i> {{ errorMessage }}
+      </div>
+
+      <!-- Loading Spinner -->
+      <div class="text-center" *ngIf="isLoading">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Loading users...</p>
+      </div>
+
+      <!-- Users Table -->
+      <div class="card" *ngIf="!isLoading">
+        <div class="card-header">
+          <h5 class="mb-0">
+            Users ({{ filteredUsers.length }} of {{ users.length }})
+          </h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Joined</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let user of filteredUsers; trackBy: trackByUserId">
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <i class="fas fa-user-circle fa-2x text-muted me-2"></i>
+                      <div>
+                        <strong>{{ user.name }}</strong>
+                      </div>
+                    </div>
+                  </td>
+                  <td>{{ user.email }}</td>
+                  <td>
+                    <span class="badge" 
+                          [ngClass]="user.role === 'admin' ? 'bg-danger' : 'bg-primary'">
+                      <i class="fas" [ngClass]="user.role === 'admin' ? 'fa-crown' : 'fa-user'"></i>
+                      {{ user.role | titlecase }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge" 
+                          [ngClass]="user.isVerified ? 'bg-success' : 'bg-warning'">
+                      <i class="fas" [ngClass]="user.isVerified ? 'fa-check-circle' : 'fa-clock'"></i>
+                      {{ user.isVerified ? 'Verified' : 'Pending' }}
+                    </span>
+                  </td>
+                  <td>
+                    <small class="text-muted">
+                      {{ user.createdAt | date:'short' }}
+                    </small>
+                  </td>
+                  <td>
+                    <div class="btn-group" role="group">
+                      <!-- Toggle Verification -->
+                      <button 
+                        class="btn btn-sm"
+                        [ngClass]="user.isVerified ? 'btn-warning' : 'btn-success'"
+                        (click)="toggleUserStatus(user)"
+                        [title]="user.isVerified ? 'Suspend User' : 'Verify User'">
+                        <i class="fas" [ngClass]="user.isVerified ? 'fa-ban' : 'fa-check'"></i>
+                      </button>
+
+                      <!-- Toggle Admin -->
+                      <button 
+                        class="btn btn-sm"
+                        [ngClass]="user.role === 'admin' ? 'btn-secondary' : 'btn-info'"
+                        (click)="toggleAdminStatus(user)"
+                        [title]="user.role === 'admin' ? 'Remove Admin' : 'Make Admin'">
+                        <i class="fas fa-crown"></i>
+                      </button>
+
+                      <!-- Delete User -->
+                      <button 
+                        class="btn btn-sm btn-danger"
+                        (click)="deleteUser(user._id)"
+                        title="Delete User">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- No Users Message -->
+      <div class="alert alert-info" *ngIf="!isLoading && filteredUsers.length === 0 && users.length === 0">
+        <i class="fas fa-info-circle"></i> No users found.
+      </div>
+
+      <!-- No Search Results -->
+      <div class="alert alert-warning" *ngIf="!isLoading && filteredUsers.length === 0 && users.length > 0">
+        <i class="fas fa-search"></i> No users match your search criteria.
+        <button class="btn btn-link p-0 ms-2" (click)="clearSearch()">Clear search</button>
+      </div>
+    </div>
+  </div>
 </div>
