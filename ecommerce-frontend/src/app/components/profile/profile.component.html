@@ -1,1 +1,25 @@
-<p>profile works!</p>
+<div class="container mt-5">
+  <h2 class="text-center mb-4">Welcome, {{ name }}</h2>
+
+  <div *ngIf="message" class="alert alert-success">{{ message }}</div>
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <form (ngSubmit)="updateProfile()" class="card p-4">
+    <div class="mb-3">
+      <label for="newName" class="form-label">New Name</label>
+      <input type="text" id="newName" [(ngModel)]="newName" name="newName" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+      <label for="oldPassword" class="form-label">Old Password</label>
+      <input type="password" id="oldPassword" [(ngModel)]="oldPassword" name="oldPassword" class="form-control" required />
+    </div>
+
+    <div class="mb-3">
+      <label for="newPassword" class="form-label">New Password</label>
+      <input type="password" id="newPassword" [(ngModel)]="newPassword" name="newPassword" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100">Update Profile</button>
+  </form>
+</div>

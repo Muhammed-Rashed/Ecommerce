@@ -10,6 +10,7 @@ interface User {
   email: string;
   isAdmin: boolean;
   isVerified: boolean;
+  role: string;
 }
 
 interface AuthResponse {
@@ -17,7 +18,6 @@ interface AuthResponse {
   user: User;
 }
 
-// Helper function
 function isBrowser(): boolean {
   return typeof window !== 'undefined';
 }
@@ -26,7 +26,7 @@ function isBrowser(): boolean {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:5000/auth'; // your backend
+  private apiUrl = 'http://localhost:5000/auth';
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
@@ -42,7 +42,15 @@ export class AuthService {
       try {
         const decoded: any = jwtDecode(token);
         if (decoded.exp * 1000 > Date.now()) {
-          this.currentUserSubject.next(decoded);
+          const user: User = {
+            id: decoded.id,
+            name: decoded.name,
+            email: decoded.email,
+            isAdmin: decoded.isAdmin,
+            isVerified: decoded.isVerified,
+            role: decoded.role
+          };
+          this.currentUserSubject.next(user);
         } else {
           this.logout();
         }
@@ -53,14 +61,15 @@ export class AuthService {
   }
 
   register(userData: any): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, userData);
+    return this.http.post<AuthResponse>(`${this.apiUrl}/signup`, userData);
   }
 
   login(credentials: any): Observable<AuthResponse> {
     return new Observable<AuthResponse>((observer) => {
       this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials).subscribe({
         next: (response) => {
-          this.setAuthData(response.token);
+          localStorage.setItem('token', response.token);
+          this.currentUserSubject.next(response.user);
           observer.next(response);
           observer.complete();
         },
@@ -87,7 +96,7 @@ export class AuthService {
 
   isAdmin(): boolean {
     const user = this.currentUserSubject.value;
-    return user?.isAdmin || false;
+    return !!(user?.isAdmin || user?.role === 'admin');
   }
 
   getCurrentUser(): User | null {
@@ -98,16 +107,28 @@ export class AuthService {
     return isBrowser() ? localStorage.getItem('token') : null;
   }
 
+  // Optional: if you need to decode token and restore user manually
   setAuthData(token: string): void {
     if (isBrowser()) {
       localStorage.setItem('token', token);
       try {
         const decoded: any = jwtDecode(token);
-        this.currentUserSubject.next(decoded);
+
+        const user: User = {
+          id: decoded.id,
+          name: decoded.name,
+          email: decoded.email,
+          isVerified: decoded.isVerified,
+          role: decoded.role,
+          isAdmin: decoded.role === 'admin'
+        };
+
+        this.currentUserSubject.next(user);
       } catch (err) {
         console.error('Invalid token:', err);
         this.logout();
       }
     }
   }
+
 }

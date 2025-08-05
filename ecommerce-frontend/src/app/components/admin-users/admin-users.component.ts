@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 
 interface User {
@@ -13,13 +14,14 @@ interface User {
 @Component({
   selector: 'app-admin-users',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './admin-users.component.html',
   styleUrls: ['./admin-users.component.css']
 })
 export class AdminUsersComponent implements OnInit {
   users: User[] = [];
-  apiUrl = 'http://localhost:3000/api/user'; // Your user routes
+  searchName = '';
+  apiUrl = 'http://localhost:5000/admin/users';
 
   constructor(private http: HttpClient) {}
 
@@ -28,14 +30,26 @@ export class AdminUsersComponent implements OnInit {
   }
 
   loadUsers(): void {
-    this.http.get<User[]>(this.apiUrl).subscribe(data => {
+    this.http.get<User[]>(this.apiUrl).subscribe(data => this.users = data);
+  }
+
+  searchUsers(): void {
+    this.http.get<User[]>(`${this.apiUrl}?name=${this.searchName}`).subscribe(data => {
       this.users = data;
     });
   }
 
-  deleteUser(id: string): void {
-    this.http.delete(`${this.apiUrl}/${id}`).subscribe(() => {
-      this.loadUsers();
+  updateUser(user: User): void {
+    this.http.put(`${this.apiUrl}/${user._id}`, user).subscribe(() => {
+      alert('User updated');
     });
+  }
+
+  deleteUser(id: string): void {
+    if (confirm('Are you sure you want to delete this user?')) {
+      this.http.delete(`${this.apiUrl}/${id}`).subscribe(() => {
+        this.loadUsers();
+      });
+    }
   }
 }

@@ -3,7 +3,19 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const sendEmail = require('../utils/sendEmail');
 
-const createToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+const createToken = (user) =>
+  jwt.sign(
+    {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      isAdmin: user.role === 'admin', // Add isAdmin based on role
+      isVerified: user.isVerified
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: '7d' }
+  );
 
 exports.signup = async (req, res) => {
   const { name, email, password } = req.body;
@@ -12,7 +24,7 @@ exports.signup = async (req, res) => {
   if (exists) return res.status(400).json({ message: 'Email already exists' });
 
   const user = await User.create({ name, email, password });
-  const emailToken = createToken(user._id);
+  const emailToken = createToken(user);
 
   const url = `http://localhost:5000/auth/verify/${emailToken}`;
   await sendEmail(email, 'Verify your email', `<a href="${url}">Click to verify</a>`);
@@ -44,6 +56,16 @@ exports.login = async (req, res) => {
   const match = await bcrypt.compare(password, user.password);
   if (!match) return res.status(401).json({ message: 'Incorrect password' });
 
-  const token = createToken(user._id);
-  res.status(200).json({ token, user: { name: user.name, email: user.email, role: user.role } });
+  const token = createToken(user);
+  res.status(200).json({ 
+    token, 
+    user: { 
+      id: user._id,
+      name: user.name, 
+      email: user.email, 
+      role: user.role,
+      isAdmin: user.role === 'admin', // Include isAdmin in response
+      isVerified: user.isVerified
+    } 
+  });
 };

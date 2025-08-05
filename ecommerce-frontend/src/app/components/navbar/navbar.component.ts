@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { CartService } from '../../services/cart.service';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-navbar',
@@ -13,9 +14,12 @@ import { Router } from '@angular/router';
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.css']
 })
-export class NavbarComponent implements OnInit {
+export class NavbarComponent implements OnInit, OnDestroy {
   cartItemCount = 0;
   searchQuery = '';
+  isAdmin = false;
+  currentUser: any = null;
+  private userSub!: Subscription;
 
   constructor(
     public authService: AuthService,
@@ -24,10 +28,19 @@ export class NavbarComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Subscribe to cart items
     this.cartService.cartItems$.subscribe(items => {
       this.cartItemCount = items.reduce((total, item) => total + item.quantity, 0);
     });
 
+    // Subscribe to user changes and determine admin status
+    this.userSub = this.authService.currentUser$.subscribe(user => {
+      this.currentUser = user;
+      // Check both isAdmin and role properties for admin access
+      this.isAdmin = !!(user?.isAdmin || user?.role === 'admin');
+    });
+
+    // Refresh cart if user is logged in
     if (this.authService.isLoggedIn()) {
       this.cartService.refreshCart();
     }
@@ -41,5 +54,16 @@ export class NavbarComponent implements OnInit {
 
   logout(): void {
     this.authService.logout();
+  }
+
+  // Helper method to check if user is logged in
+  isLoggedIn(): boolean {
+    return this.authService.isLoggedIn();
+  }
+
+  ngOnDestroy(): void {
+    if (this.userSub) {
+      this.userSub.unsubscribe();
+    }
   }
 }

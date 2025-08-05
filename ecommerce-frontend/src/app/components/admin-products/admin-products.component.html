@@ -1,39 +1,32 @@
-<h2>Manage Products</h2>
+<div class="container">
+  <h2>Manage Products</h2>
 
-<form (submit)="addProduct(); $event.preventDefault()">
-  <h3>Add New Product</h3>
-  <input type="text" [(ngModel)]="newProduct.name" name="name" placeholder="Name" required />
-  <input type="text" [(ngModel)]="newProduct.image" name="image" placeholder="Image URL" required />
-  <input type="text" [(ngModel)]="newProduct.category" name="category" placeholder="Category" required />
-  <input type="number" [(ngModel)]="newProduct.quantity" name="quantity" placeholder="Quantity" required />
-  <input type="number" [(ngModel)]="newProduct.price" name="price" placeholder="Price" required />
-  <input type="text" [(ngModel)]="newProduct.barId" name="barId" placeholder="Barcode ID" required />
-  <label>
-    <input type="checkbox" [(ngModel)]="newProduct.inStock" name="inStock" />
-    In Stock
-  </label>
-  <button type="submit">Add</button>
-</form>
+  <form (ngSubmit)="addProduct()" class="row g-2 mb-4">
+    <div class="col-md-3"><input [(ngModel)]="newProduct.name" name="name" class="form-control" placeholder="Name"></div>
+    <div class="col-md-2"><input [(ngModel)]="newProduct.price" name="price" class="form-control" type="number" placeholder="Price"></div>
+    <div class="col-md-2"><input [(ngModel)]="newProduct.category" name="category" class="form-control" placeholder="Category"></div>
+    <div class="col-md-2"><input [(ngModel)]="newProduct.barId" name="barId" class="form-control" placeholder="Bar ID"></div>
+    <div class="col-md-2"><input [(ngModel)]="newProduct.quantity" name="quantity" class="form-control" type="number" placeholder="Qty"></div>
+    <div class="col-md-1"><button class="btn btn-primary w-100">Add</button></div>
+  </form>
 
-<table *ngIf="products.length > 0">
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Category</th>
-      <th>Quantity</th>
-      <th>Price</th>
-      <th>In Stock</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let p of products">
-      <td>{{ p.name }}</td>
-      <td>{{ p.category }}</td>
-      <td>{{ p.quantity }}</td>
-      <td>{{ p.price }}</td>
-      <td>{{ p.inStock }}</td>
-      <td><button (click)="deleteProduct(p._id!)">Delete</button></td>
-    </tr>
-  </tbody>
-</table>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Name</th><th>Price</th><th>Category</th><th>Qty</th><th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let product of products">
+        <td><input [(ngModel)]="product.name" class="form-control"></td>
+        <td><input [(ngModel)]="product.price" class="form-control" type="number"></td>
+        <td><input [(ngModel)]="product.category" class="form-control"></td>
+        <td><input [(ngModel)]="product.quantity" class="form-control" type="number"></td>
+        <td>
+          <button class="btn btn-success btn-sm me-2" (click)="updateProduct(product)">Update</button>
+          <button class="btn btn-danger btn-sm" (click)="deleteProduct(product._id!)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

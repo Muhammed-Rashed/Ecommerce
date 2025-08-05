@@ -1,24 +1,26 @@
-<h2>Manage Users</h2>
+<div class="container">
+  <h2>Manage Users</h2>
 
-<table *ngIf="users.length > 0">
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Email</th>
-      <th>Admin</th>
-      <th>Verified</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let user of users">
-      <td>{{ user.name }}</td>
-      <td>{{ user.email }}</td>
-      <td>{{ user.isAdmin }}</td>
-      <td>{{ user.isVerified }}</td>
-      <td>
-        <button (click)="deleteUser(user._id)">Delete</button>
-      </td>
-    </tr>
-  </tbody>
-</table>
+  <input class="form-control my-2" [(ngModel)]="searchName" placeholder="Search by name">
+  <button class="btn btn-primary mb-3" (click)="searchUsers()">Search</button>
+
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Name</th><th>Email</th><th>Admin</th><th>Verified</th><th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let user of users">
+        <td><input [(ngModel)]="user.name" class="form-control"></td>
+        <td><input [(ngModel)]="user.email" class="form-control"></td>
+        <td><input type="checkbox" [(ngModel)]="user.isAdmin"></td>
+        <td>{{ user.isVerified ? '✔️' : '❌' }}</td>
+        <td>
+          <button class="btn btn-success btn-sm me-2" (click)="updateUser(user)">Update</button>
+          <button class="btn btn-danger btn-sm" (click)="deleteUser(user._id)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
