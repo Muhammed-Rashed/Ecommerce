@@ -5,7 +5,7 @@ import { Product } from './product.service';
 
 export interface CartItem {
   _id?: string;
-  product: Product;
+  product: Product | null;
   quantity: number;
   userId: string;
 }
@@ -14,7 +14,7 @@ export interface CartItem {
   providedIn: 'root'
 })
 export class CartService {
-  private apiUrl = 'http://localhost:5000/cart'; // Your cart routes
+  private baseUrl = 'http://localhost:5000/cart';
   private cartItemsSubject = new BehaviorSubject<CartItem[]>([]);
   public cartItems$ = this.cartItemsSubject.asObservable();
 
@@ -29,29 +29,32 @@ export class CartService {
   }
 
   getCartItems(): Observable<CartItem[]> {
-    return this.http.get<CartItem[]>(this.apiUrl, { headers: this.getHeaders() });
+    return this.http.get<CartItem[]>(this.baseUrl, {
+      headers: this.getHeaders()
+    });
   }
 
   addToCart(productId: string, quantity: number = 1): Observable<CartItem> {
-    return this.http.post<CartItem>(this.apiUrl, 
-      { productId, quantity }, 
-      { headers: this.getHeaders() }
-    );
+    return this.http.post<CartItem>(`${this.baseUrl}/add`, { productId, quantity }, {
+      headers: this.getHeaders()
+    });
   }
 
-  updateCartItem(itemId: string, quantity: number): Observable<CartItem> {
-    return this.http.put<CartItem>(`${this.apiUrl}/${itemId}`, 
-      { quantity }, 
-      { headers: this.getHeaders() }
-    );
+  updateCartItem(productId: string, quantity: number): Observable<CartItem> {
+    return this.addToCart(productId, quantity);
   }
 
-  removeFromCart(itemId: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${itemId}`, { headers: this.getHeaders() });
+  removeFromCart(productId: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/remove`, 
+      { productId }, 
+      { headers: this.getHeaders() }
+    );
   }
 
   clearCart(): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/clear`, { headers: this.getHeaders() });
+    return this.http.delete(`${this.baseUrl}/clear`, {
+      headers: this.getHeaders()
+    });
   }
 
   refreshCart(): void {
@@ -65,8 +68,8 @@ export class CartService {
   }
 
   getCartTotal(): number {
-    return this.cartItemsSubject.value.reduce((total, item) => 
-      total + (item.product.price * item.quantity), 0
+    return this.cartItemsSubject.value.reduce((total, item) =>
+      total + ((item.product?.price ?? 0) * item.quantity), 0
     );
   }
 }

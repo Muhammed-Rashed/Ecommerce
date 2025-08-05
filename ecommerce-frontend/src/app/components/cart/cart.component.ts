@@ -24,24 +24,30 @@ export class CartComponent implements OnInit {
 
   updateQuantity(item: CartItem, quantityStr: string): void {
     const quantity = parseInt(quantityStr, 10);
-    if (!quantity || quantity <= 0) return;
+    if (!quantity || quantity <= 0 || !item.product?._id) return;
 
-    this.cartService.updateCartItem(item._id!, quantity).subscribe(() => {
+    this.cartService.updateCartItem(item.product._id, quantity).subscribe(() => {
       this.cartService.refreshCart();
     });
   }
 
   removeItem(item: CartItem): void {
-    this.cartService.removeFromCart(item._id!).subscribe(() => {
+    const productId = item.product?._id;
+    if (!productId) return;
+
+    this.cartService.removeFromCart(productId).subscribe(() => {
       this.cartService.refreshCart();
     });
   }
 
+
+
   getTotal(): number {
     return this.cartItems.reduce((total, item) =>
-      total + item.product.price * item.quantity, 0
+      total + (item.product?.price || 0) * item.quantity, 0
     );
   }
+
 
   clearCart(): void {
     this.cartService.clearCart().subscribe(() => {

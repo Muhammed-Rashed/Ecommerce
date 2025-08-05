@@ -23,7 +23,7 @@ export class SignupComponent {
   signup(): void {
     this.auth.register({ name: this.name, email: this.email, password: this.password }).subscribe({
       next: (res) => {
-        this.auth.setAuthData(res.token, res.user);
+        this.auth.setAuthData(res.token);
         this.message = 'Account created! Please check your email to verify.';
         this.router.navigate(['/verify']);
       },

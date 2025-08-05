@@ -1,0 +1,53 @@
+/* Make navbar stick to top */
+.navbar {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1050;
+}
+
+/* Brand logo/icon spacing */
+.navbar-brand i {
+  margin-right: 8px;
+}
+
+/* Search input styling */
+.navbar form input[type="search"] {
+  border-radius: 20px;
+  padding-left: 15px;
+  border: none;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.navbar form input[type="search"]:focus {
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+}
+
+/* Submit button next to search */
+.navbar form button {
+  border-radius: 20px;
+}
+
+/* Cart badge */
+.navbar .badge {
+  font-size: 0.75rem;
+  padding: 0.35em 0.6em;
+}
+
+/* User dropdown spacing */
+.navbar .dropdown-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.navbar .dropdown-menu {
+  min-width: 10rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .navbar form {
+    width: 100% !important;
+    margin-top: 0.5rem;
+  }
+}

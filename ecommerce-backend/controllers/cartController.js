@@ -5,6 +5,9 @@ exports.getCart = async (req, res) => {
 
   if (!cart) return res.json([]);
 
+  cart.items = cart.items.filter(i => i.productId != null);
+  await cart.save();
+
   const items = cart.items.map(i => ({
     _id: i._id,
     product: i.productId,
@@ -35,7 +38,17 @@ exports.addToCart = async (req, res) => {
 exports.removeFromCart = async (req, res) => {
   const { productId } = req.body;
   const cart = await Cart.findOne({ userId: req.user._id });
+
   cart.items = cart.items.filter(i => !i.productId.equals(productId));
   await cart.save();
+
   res.json(cart);
+};
+
+exports.clearCart = async (req, res) => {
+  await Cart.findOneAndUpdate(
+    { userId: req.user._id },
+    { $set: { items: [] } }
+  );
+  res.json({ message: 'Cart cleared' });
 };

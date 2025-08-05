@@ -16,23 +16,25 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let item of cartItems">
-        <td>{{ item.product.name }}</td>
-        <td>${{ item.product.price }}</td>
-        <td>
-          <input
-            #qtyInput
-            type="number"
-            min="1"
-            [value]="item.quantity"
-            (change)="updateQuantity(item, qtyInput.value)"
-          />
-        </td>
-        <td>${{ item.product.price * item.quantity }}</td>
-        <td>
-          <button (click)="removeItem(item)">Remove</button>
-        </td>
-      </tr>
+      <ng-container *ngFor="let item of cartItems">
+        <tr *ngIf="item.product">
+          <td>{{ item.product.name }}</td>
+          <td>${{ item.product.price }}</td>
+          <td>
+            <input
+              #qtyInput
+              type="number"
+              min="1"
+              [value]="item.quantity"
+              (change)="updateQuantity(item, qtyInput.value)"
+            />
+          </td>
+          <td>${{ item.product.price * item.quantity }}</td>
+          <td>
+            <button (click)="removeItem(item)">Remove</button>
+          </td>
+        </tr>
+      </ng-container>
     </tbody>
   </table>
 

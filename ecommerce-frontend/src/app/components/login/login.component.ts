@@ -21,7 +21,7 @@ export class LoginComponent {
   login(): void {
     this.auth.login({ email: this.email, password: this.password }).subscribe({
       next: (res) => {
-        this.auth.setAuthData(res.token, res.user);
+        this.auth.setAuthData(res.token);
         if (res.user.isVerified) {
           this.router.navigate(['/']);
         } else {

@@ -1,76 +1,55 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
-  <div class="container">
-    <a class="navbar-brand" routerLink="/">
-      <i class="fas fa-store"></i> E-Shop
-    </a>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container-fluid">
+    <a class="navbar-brand" routerLink="/">E-Shop</a>
 
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <!-- Search Bar -->
-      <form class="d-flex mx-auto" style="width: 40%;" (ngSubmit)="onSearch()">
-        <input 
-          class="form-control me-2" 
-          type="search" 
-          placeholder="Search products..." 
-          [(ngModel)]="searchQuery"
-          name="search">
-        <button class="btn btn-outline-light" type="submit">
-          <i class="fas fa-search"></i>
-        </button>
-      </form>
-
-      <!-- Navigation Links -->
-      <ul class="navbar-nav ms-auto">
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
           <a class="nav-link" routerLink="/products">Products</a>
         </li>
 
-        <!-- User Menu -->
-        <ng-container *ngIf="authService.isLoggedIn(); else loginMenu">
-          <!-- Cart -->
-          <li class="nav-item">
-            <a class="nav-link position-relative" routerLink="/cart">
-              <i class="fas fa-shopping-cart"></i> Cart
-              <span *ngIf="cartItemCount > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                {{ cartItemCount }}
-              </span>
-            </a>
-          </li>
+        <!-- Cart (Only when logged in) -->
+        <li class="nav-item" *ngIf="authService.isLoggedIn()">
+          <a class="nav-link position-relative" routerLink="/cart">
+            <i class="fas fa-shopping-cart"></i> Cart
+            <span *ngIf="cartItemCount > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+              {{ cartItemCount }}
+            </span>
+          </a>
+        </li>
 
-          <!-- Admin Menu -->
-          <li class="nav-item dropdown" *ngIf="authService.isAdmin()">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-              Admin
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" routerLink="/admin/products">Manage Products</a></li>
-              <li><a class="dropdown-item" routerLink="/admin/users">Manage Users</a></li>
-            </ul>
-          </li>
-
-          <!-- User Menu -->
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-              <i class="fas fa-user"></i> {{ (authService.currentUser$ | async)?.name }}
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" routerLink="/profile">Profile</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="#" (click)="logout()">Logout</a></li>
-            </ul>
-          </li>
-        </ng-container>
-
-        <!-- Login/Register Menu -->
-        <ng-template #loginMenu>
+        <!-- Guest Menu -->
+        <ng-container *ngIf="!authService.isLoggedIn(); else userMenu">
           <li class="nav-item">
             <a class="nav-link" routerLink="/login">Login</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" routerLink="/register">Register</a>
+            <a class="nav-link" routerLink="/register">Sign up</a>
+          </li>
+        </ng-container>
+
+        <!-- Logged In Menu -->
+        <ng-template #userMenu>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle"
+               href="#"
+               role="button"
+               data-bs-toggle="dropdown"
+               aria-expanded="false"
+               (click)="$event.preventDefault()">
+              <i class="fas fa-user"></i> {{ (authService.currentUser$ | async)?.name }}
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <li><a class="dropdown-item" routerLink="/profile">Profile</a></li>
+              <li *ngIf="authService.isAdmin()"><a class="dropdown-item" routerLink="/admin">Admin Panel</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="#" (click)="logout()">Sign out</a></li>
+            </ul>
           </li>
         </ng-template>
       </ul>

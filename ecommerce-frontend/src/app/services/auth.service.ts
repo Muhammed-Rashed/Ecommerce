@@ -17,7 +17,7 @@ interface AuthResponse {
   user: User;
 }
 
-// ✅ Helper to check if code is running in browser
+// Helper function
 function isBrowser(): boolean {
   return typeof window !== 'undefined';
 }
@@ -26,7 +26,7 @@ function isBrowser(): boolean {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:5000/auth'; // Your MongoDB-backed API
+  private apiUrl = 'http://localhost:5000/auth'; // your backend
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
@@ -57,7 +57,16 @@ export class AuthService {
   }
 
   login(credentials: any): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials);
+    return new Observable<AuthResponse>((observer) => {
+      this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials).subscribe({
+        next: (response) => {
+          this.setAuthData(response.token);
+          observer.next(response);
+          observer.complete();
+        },
+        error: (err) => observer.error(err)
+      });
+    });
   }
 
   logout(): void {
@@ -89,10 +98,16 @@ export class AuthService {
     return isBrowser() ? localStorage.getItem('token') : null;
   }
 
-  setAuthData(token: string, user: User): void {
+  setAuthData(token: string): void {
     if (isBrowser()) {
       localStorage.setItem('token', token);
+      try {
+        const decoded: any = jwtDecode(token);
+        this.currentUserSubject.next(decoded);
+      } catch (err) {
+        console.error('Invalid token:', err);
+        this.logout();
+      }
     }
-    this.currentUserSubject.next(user);
   }
 }
