@@ -1,8 +1,46 @@
 <div class="container">
   <h2>Manage Products</h2>
 
+  <!-- Search and Filter Section -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-8">
+          <div class="input-group">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Search by name or price..."
+              [(ngModel)]="searchName"
+              (input)="searchProducts()"
+              name="searchName">
+            <button 
+              class="btn btn-outline-secondary" 
+              type="button" 
+              (click)="clearSearch()"
+              *ngIf="searchName">
+              <i class="fas fa-times"></i>
+            </button>
+            <button 
+              class="btn btn-primary" 
+              type="button" 
+              (click)="searchProducts()">
+              <i class="fas fa-search"></i> Search
+            </button>
+          </div>
+        </div>
+        <div class="col-md-4 text-end">
+          <button class="btn btn-success" (click)="loadProducts()">
+            <i class="fas fa-sync-alt"></i> Refresh
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <form (ngSubmit)="addProduct()" class="row g-2 mb-4">
     <div class="col-md-3"><input [(ngModel)]="newProduct.name" name="name" class="form-control" placeholder="Name"></div>
+    <div class="col-md-3"><input [(ngModel)]="newProduct.image" name="image" class="form-control" placeholder="Image"></div>
     <div class="col-md-2"><input [(ngModel)]="newProduct.price" name="price" class="form-control" type="number" placeholder="Price"></div>
     <div class="col-md-2"><input [(ngModel)]="newProduct.category" name="category" class="form-control" placeholder="Category"></div>
     <div class="col-md-2"><input [(ngModel)]="newProduct.barId" name="barId" class="form-control" placeholder="Bar ID"></div>
@@ -13,11 +51,12 @@
   <table class="table table-bordered">
     <thead>
       <tr>
-        <th>Name</th><th>Price</th><th>Category</th><th>Qty</th><th>Actions</th>
+        <th>Name</th><th>ImageURL</th><th>Price</th><th>Category</th><th>Qty</th><th>Actions</th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let product of products">
+      <tr *ngFor="let product of filteredProducts">
+        <td><input [(ngModel)]="product.name" class="form-control"></td>
         <td><input [(ngModel)]="product.name" class="form-control"></td>
         <td><input [(ngModel)]="product.price" class="form-control" type="number"></td>
         <td><input [(ngModel)]="product.category" class="form-control"></td>

@@ -1,4 +1,3 @@
-// admin-users.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -8,14 +7,23 @@ import { AdminService } from '../../services/admin.service';
   selector: 'app-admin-users',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './admin-users.component.html'
+  templateUrl: './admin-users.component.html',
+  styleUrls: ['./admin-users.component.css']
 })
 export class AdminUsersComponent implements OnInit {
   users: any[] = [];
   filteredUsers: any[] = [];
   searchName = '';
+  newUser: any = {
+    name: '',
+    email: '',
+    password: '',
+    role: 'user',
+    isVerified: true,
+  };
   isLoading = false;
   errorMessage = '';
+  successMessage = '';
 
   constructor(private adminService: AdminService) {}
 
@@ -29,16 +37,22 @@ export class AdminUsersComponent implements OnInit {
 
   loadUsers(): void {
     this.isLoading = true;
+    this.errorMessage = '';
     this.adminService.getAllUsers().subscribe({
       next: (response) => {
-        // Handle paginated response from backend
-        this.users = response.users || response || [];
-        this.filteredUsers = this.users;
-        this.isLoading = false;
+        try {
+          this.users = response.users || response || [];
+          this.filteredUsers = [...this.users];
+          this.isLoading = false;
+        } catch (error) {
+          console.error('Error processing users data:', error);
+          this.errorMessage = 'Failed to process users data';
+          this.isLoading = false;
+        }
       },
       error: (error) => {
         console.error('Error loading users:', error);
-        this.errorMessage = 'Failed to load users';
+        this.errorMessage = error.error?.message || 'Failed to load users';
         this.isLoading = false;
         this.users = [];
         this.filteredUsers = [];
@@ -46,55 +60,116 @@ export class AdminUsersComponent implements OnInit {
     });
   }
 
-  searchUsers(): void {
-    if (!Array.isArray(this.users)) {
-      console.error('Users data is not an array:', this.users);
+  addUser(): void {
+    if (!this.newUser.name || !this.newUser.email || !this.newUser.password) {
+      this.errorMessage = 'Please fill in all required fields (name, email, password)';
       return;
     }
+
+    this.isLoading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
     
-    this.filteredUsers = this.searchName.trim() 
-      ? this.users.filter(user => 
-          user.name?.toLowerCase().includes(this.searchName.toLowerCase()) ||
-          user.email?.toLowerCase().includes(this.searchName.toLowerCase())
-        )
-      : this.users;
-  }
-
-  clearSearch(): void {
-    this.searchName = '';
-    this.filteredUsers = this.users;
-  }
-
-  deleteUser(id: string): void {
-    if (confirm('Delete this user?')) {
-      this.adminService.deleteUser(id).subscribe({
-        next: () => this.loadUsers(),
-        error: (error) => {
-          console.error('Error deleting user:', error);
-          this.errorMessage = 'Failed to delete user';
-        }
-      });
-    }
-  }
-
-  toggleUserStatus(user: any): void {
-    user.isVerified = !user.isVerified;
-    this.adminService.updateUser(user._id, user).subscribe({
+    this.adminService.createUser(this.newUser).subscribe({
+      next: () => {
+        this.successMessage = 'User added successfully!';
+        this.newUser = {
+          name: '',
+          email: '',
+          password: '',
+          role: 'user',
+          isVerified: true,
+        };
+        this.loadUsers();
+        setTimeout(() => this.successMessage = '', 3000);
+      },
       error: (error) => {
-        console.error('Error updating user:', error);
-        this.errorMessage = 'Failed to update user';
-        user.isVerified = !user.isVerified; // Revert on error
+        console.error('Error adding User:', error);
+        this.errorMessage = error.error?.message || 'Failed to add user';
+        this.isLoading = false;
       }
     });
   }
 
-  toggleAdminStatus(user: any): void {
-    user.role = user.role === 'admin' ? 'user' : 'admin';
-    this.adminService.updateUser(user._id, user).subscribe({
+  searchUsers(): void {
+    if (!Array.isArray(this.users)) {
+      console.error('Users data is not an array:', this.users);
+      this.filteredUsers = [];
+      return;
+    }
+    
+    const searchTerm = this.searchName.trim().toLowerCase();
+    this.filteredUsers = searchTerm 
+      ? this.users.filter(user => 
+          user.name?.toLowerCase().includes(searchTerm) ||
+          user.email?.toLowerCase().includes(searchTerm)
+        )
+      : [...this.users];
+  }
+
+  clearSearch(): void {
+    this.searchName = '';
+    this.filteredUsers = [...this.users];
+  }
+
+  deleteUser(id: string): void {
+    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+      return;
+    }
+
+    this.isLoading = true;
+    this.errorMessage = '';
+    
+    this.adminService.deleteUser(id).subscribe({
+      next: () => {
+        this.successMessage = 'User deleted successfully!';
+        this.loadUsers();
+        setTimeout(() => this.successMessage = '', 3000);
+      },
       error: (error) => {
-        console.error('Error updating role:', error);
-        this.errorMessage = 'Failed to update role';
-        user.role = user.role === 'admin' ? 'user' : 'admin'; // Revert on error
+        console.error('Error deleting user:', error);
+        this.errorMessage = error.error?.message || 'Failed to delete user';
+        this.isLoading = false;
+      }
+    });
+  }
+
+  updateUser(user: any): void {
+    if (!user._id) {
+      this.errorMessage = 'Cannot update user: missing ID';
+      return;
+    }
+
+    this.isLoading = true;
+    this.errorMessage = '';
+    
+    this.adminService.updateUser(user._id, user).subscribe({
+      next: () => {
+        this.successMessage = 'User updated successfully!';
+        this.isLoading = false;
+        setTimeout(() => this.successMessage = '', 3000);
+      },
+      error: (error) => {
+        console.error('Error updating user:', error);
+        this.errorMessage = error.error?.message || 'Failed to update user';
+        this.isLoading = false;
+      }
+    });
+  }
+
+  toggleUserStatus(user: any): void {
+    const originalStatus = user.isVerified;
+    user.isVerified = !user.isVerified;
+    
+    this.adminService.updateUser(user._id, user).subscribe({
+      next: () => {
+        this.successMessage = `User ${user.isVerified ? 'verified' : 'unverified'} successfully!`;
+        setTimeout(() => this.successMessage = '', 3000);
+      },
+      error: (error) => {
+        console.error('Error updating user status:', error);
+        this.errorMessage = error.error?.message || 'Failed to update user status';
+        user.isVerified = originalStatus; // Revert on error
       }
     });
   }

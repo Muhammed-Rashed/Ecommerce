@@ -5,6 +5,7 @@ const adminController = require('../controllers/adminController');
 
 // Users
 router.get('/users', protect, adminOnly, adminController.getAllUsers);
+router.post('/users', protect, adminOnly, adminController.createUser);
 router.get('/users/:id', protect, adminOnly, adminController.getUserById);
 router.put('/users/:id', protect, adminOnly, adminController.updateUser);
 router.delete('/users/:id', protect, adminOnly, adminController.deleteUser);

@@ -28,6 +28,10 @@ export class AdminService {
     return this.http.get(`${this.baseUrl}/users/${id}`, { headers: this.getHeaders() });
   }
 
+  createUser(userData: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/users`, userData, { headers: this.getHeaders() });
+  }
+
   updateUser(id: string, userData: any): Observable<any> {
     return this.http.put(`${this.baseUrl}/users/${id}`, userData, { headers: this.getHeaders() });
   }

@@ -13,7 +13,6 @@
           <a class="nav-link" routerLink="/products">Products</a>
         </li>
 
-        <!-- Cart (Only for regular users and when logged in) -->
         <li class="nav-item" *ngIf="isLoggedIn() && !isAdmin">
           <a class="nav-link position-relative" routerLink="/cart">
             <i class="fas fa-shopping-cart"></i> Cart
@@ -22,52 +21,10 @@
             </span>
           </a>
         </li>
-
-        <!-- Admin Dashboard Link (Only for admins) -->
-        <li class="nav-item" *ngIf="isAdmin">
-          <a class="nav-link" routerLink="/admin/dashboard">
-            <i class="fas fa-tachometer-alt"></i> Dashboard
-          </a>
-        </li>
-
-        <!-- Admin Management Dropdown (Only for admins) -->
-        <li class="nav-item dropdown" *ngIf="isAdmin">
-          <a class="nav-link dropdown-toggle" 
-             href="#" 
-             role="button" 
-             data-bs-toggle="dropdown" 
-             aria-expanded="false"
-             (click)="$event.preventDefault()">
-            <i class="fas fa-tools"></i> Manage
-          </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" routerLink="/admin/users">
-              <i class="fas fa-users"></i> Users
-            </a></li>
-            <li><a class="dropdown-item" routerLink="/admin/products">
-              <i class="fas fa-box"></i> Products
-            </a></li>
-          </ul>
-        </li>
-
-        <!-- Search Bar (Available for all logged-in users) -->
-        <li class="nav-item" *ngIf="isLoggedIn()">
-          <form class="d-flex" (ngSubmit)="onSearch()">
-            <input class="form-control me-2" 
-                   type="search" 
-                   placeholder="Search products..." 
-                   [(ngModel)]="searchQuery"
-                   name="search">
-            <button class="btn btn-outline-success" type="submit">
-              <i class="fas fa-search"></i>
-            </button>
-          </form>
-        </li>
       </ul>
 
       <!-- Right side navigation -->
       <ul class="navbar-nav">
-        <!-- Guest Menu -->
         <ng-container *ngIf="!isLoggedIn(); else userMenu">
           <li class="nav-item">
             <a class="nav-link" routerLink="/login">
@@ -110,6 +67,10 @@
                 <li><a class="dropdown-item" routerLink="/admin/products">
                   <i class="fas fa-box"></i> Manage Products
                 </a></li>
+                <li><a class="dropdown-item" routerLink="/cart">
+                  <i class="fas fa-shopping-cart"></i> My Cart
+                  <span class="badge bg-danger ms-1" *ngIf="cartItemCount > 0">{{ cartItemCount }}</span>
+                </a></li>
               </ng-container>
               
               <!-- Regular user options -->
@@ -117,9 +78,6 @@
                 <li><a class="dropdown-item" routerLink="/cart">
                   <i class="fas fa-shopping-cart"></i> My Cart
                   <span class="badge bg-danger ms-1" *ngIf="cartItemCount > 0">{{ cartItemCount }}</span>
-                </a></li>
-                <li><a class="dropdown-item" routerLink="/orders">
-                  <i class="fas fa-list"></i> Order History
                 </a></li>
               </ng-container>
               

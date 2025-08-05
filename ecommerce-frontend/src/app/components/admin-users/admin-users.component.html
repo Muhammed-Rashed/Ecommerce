@@ -2,10 +2,19 @@
   <div class="row">
     <div class="col-12">
       <h2 class="mb-4">
-        <i class="fas fa-users"></i> User Management
+        User Management
       </h2>
 
-      <!-- Search and Filter Section -->
+      <!-- Success Message -->
+      <div class="alert alert-success" *ngIf="successMessage">
+        {{ successMessage }}
+      </div>
+
+      <!-- Error Message -->
+      <div class="alert alert-danger" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
       <div class="card mb-4">
         <div class="card-body">
           <div class="row">
@@ -42,9 +51,57 @@
         </div>
       </div>
 
-      <!-- Error Message -->
-      <div class="alert alert-danger" *ngIf="errorMessage">
-        <i class="fas fa-exclamation-triangle"></i> {{ errorMessage }}
+      <!-- Add User Form -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">
+            Add New User
+          </h5>
+        </div>
+        <div class="card-body">
+          <form (ngSubmit)="addUser()" class="row g-3">
+            <div class="col-md-3">
+              <input 
+                [(ngModel)]="newUser.name" 
+                name="name" 
+                class="form-control" 
+                placeholder="Full Name"
+                required>
+            </div>
+            <div class="col-md-3">
+              <input 
+                [(ngModel)]="newUser.email" 
+                name="email" 
+                type="email"
+                class="form-control" 
+                placeholder="Email"
+                required>
+            </div>
+            <div class="col-md-3">
+              <input 
+                [(ngModel)]="newUser.password" 
+                name="password" 
+                type="password"
+                class="form-control" 
+                placeholder="Password"
+                required>
+            </div>
+            <div class="col-md-2">
+              <select [(ngModel)]="newUser.role" name="role" class="form-control">
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <div class="col-md-1">
+              <button 
+                type="submit" 
+                class="btn btn-primary w-100"
+                [disabled]="isLoading || !newUser.name || !newUser.email || !newUser.password">
+                Add
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
 
       <!-- Loading Spinner -->
@@ -79,26 +136,45 @@
                 <tr *ngFor="let user of filteredUsers; trackBy: trackByUserId">
                   <td>
                     <div class="d-flex align-items-center">
-                      <i class="fas fa-user-circle fa-2x text-muted me-2"></i>
                       <div>
-                        <strong>{{ user.name }}</strong>
+                        <input 
+                          [(ngModel)]="user.name" 
+                          class="form-control form-control-sm"
+                          (blur)="updateUser(user)">
                       </div>
                     </div>
                   </td>
-                  <td>{{ user.email }}</td>
                   <td>
-                    <span class="badge" 
-                          [ngClass]="user.role === 'admin' ? 'bg-danger' : 'bg-primary'">
-                      <i class="fas" [ngClass]="user.role === 'admin' ? 'fa-crown' : 'fa-user'"></i>
-                      {{ user.role | titlecase }}
-                    </span>
+                    <input 
+                      [(ngModel)]="user.email" 
+                      type="email"
+                      class="form-control form-control-sm"
+                      (blur)="updateUser(user)">
                   </td>
                   <td>
-                    <span class="badge" 
-                          [ngClass]="user.isVerified ? 'bg-success' : 'bg-warning'">
-                      <i class="fas" [ngClass]="user.isVerified ? 'fa-check-circle' : 'fa-clock'"></i>
-                      {{ user.isVerified ? 'Verified' : 'Pending' }}
-                    </span>
+                    <select 
+                      [(ngModel)]="user.role" 
+                      class="form-select form-select-sm"
+                      (change)="updateUser(user)">
+                      <option value="user">User</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                  </td>
+                  <td>
+                    <div class="form-check form-switch">
+                      <input 
+                        class="form-check-input" 
+                        type="checkbox" 
+                        [(ngModel)]="user.isVerified"
+                        (change)="toggleUserStatus(user)"
+                        id="verified-{{user._id}}">
+                      <label class="form-check-label" for="verified-{{user._id}}">
+                        <span class="badge" 
+                              [ngClass]="user.isVerified ? 'bg-success' : 'bg-warning'">
+                          {{ user.isVerified ? 'Verified' : 'Pending' }}
+                        </span>
+                      </label>
+                    </div>
                   </td>
                   <td>
                     <small class="text-muted">
@@ -107,30 +183,15 @@
                   </td>
                   <td>
                     <div class="btn-group" role="group">
-                      <!-- Toggle Verification -->
                       <button 
-                        class="btn btn-sm"
-                        [ngClass]="user.isVerified ? 'btn-warning' : 'btn-success'"
-                        (click)="toggleUserStatus(user)"
-                        [title]="user.isVerified ? 'Suspend User' : 'Verify User'">
-                        <i class="fas" [ngClass]="user.isVerified ? 'fa-ban' : 'fa-check'"></i>
+                        class="btn btn-sm btn-success"
+                        (click)="updateUser(user)"
+                        title="Update User">
                       </button>
-
-                      <!-- Toggle Admin -->
-                      <button 
-                        class="btn btn-sm"
-                        [ngClass]="user.role === 'admin' ? 'btn-secondary' : 'btn-info'"
-                        (click)="toggleAdminStatus(user)"
-                        [title]="user.role === 'admin' ? 'Remove Admin' : 'Make Admin'">
-                        <i class="fas fa-crown"></i>
-                      </button>
-
-                      <!-- Delete User -->
                       <button 
                         class="btn btn-sm btn-danger"
                         (click)="deleteUser(user._id)"
                         title="Delete User">
-                        <i class="fas fa-trash"></i>
                       </button>
                     </div>
                   </td>
@@ -143,12 +204,12 @@
 
       <!-- No Users Message -->
       <div class="alert alert-info" *ngIf="!isLoading && filteredUsers.length === 0 && users.length === 0">
-        <i class="fas fa-info-circle"></i> No users found.
+        No users found.
       </div>
 
       <!-- No Search Results -->
       <div class="alert alert-warning" *ngIf="!isLoading && filteredUsers.length === 0 && users.length > 0">
-        <i class="fas fa-search"></i> No users match your search criteria.
+          No users match your search criteria.
         <button class="btn btn-link p-0 ms-2" (click)="clearSearch()">Clear search</button>
       </div>
     </div>

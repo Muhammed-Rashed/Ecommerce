@@ -1,16 +1,33 @@
 import { Component } from '@angular/core';
-import { AuthService } from './services/auth.service';
+import { CommonModule } from '@angular/common';
+import { Router, NavigationEnd } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './components/navbar/navbar.component';
-import { RouterModule } from '@angular/router';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
-  templateUrl: './app.component.html',
-  imports: [NavbarComponent, RouterModule],
-  styleUrls: ['./app.component.css']
+  standalone: true,
+  imports: [
+    CommonModule, // For *ngIf
+    RouterOutlet,
+    NavbarComponent
+  ],
+  template: `
+    <app-navbar *ngIf="showNavbar"></app-navbar>
+    <div class="container-fluid">
+      <router-outlet></router-outlet>
+    </div>
+  `
 })
 export class AppComponent {
-  title = 'ecommerce-app';
-  
-  constructor(public authService: AuthService) {}
+  showNavbar = true;
+
+  constructor(private router: Router) {
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: NavigationEnd) => {
+      this.showNavbar = !['/login', '/signup'].includes(event.url);
+    });
+  }
 }
