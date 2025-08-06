@@ -20,6 +20,12 @@ export class LoginComponent {
   constructor(private auth: AuthService, private router: Router) {}
 
   login(): void {
+    this.error = ''; // Reset error
+    if (!this.email || !this.password) {
+      this.error = 'Please enter both email and password.';
+      return;
+    }
+
     this.auth.login({ email: this.email, password: this.password }).subscribe({
       next: (res) => {
         this.auth.setAuthData(res.token);
@@ -30,8 +36,10 @@ export class LoginComponent {
         }
       },
       error: (err) => {
-        this.error = err.error.message || 'Login failed.';
+        console.error(err);
+        this.error = err?.error?.message || 'Login failed. Please try again.';
       }
     });
   }
+
 }

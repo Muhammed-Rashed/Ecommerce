@@ -20,16 +20,23 @@ export class SignupComponent {
   message = '';
 
   constructor(private auth: AuthService, private router: Router) {}
-
   signup(): void {
+    this.error = '';
+    this.message = '';
+
+    if (!this.name || !this.email || !this.password) {
+      this.error = 'Please fill in all fields.';
+      return;
+    }
+
     this.auth.register({ name: this.name, email: this.email, password: this.password }).subscribe({
       next: (res) => {
-        this.auth.setAuthData(res.token);
         this.message = 'Account created! Please check your email to verify.';
         this.router.navigate(['/verify']);
       },
       error: (err) => {
-        this.error = err.error.message || 'Signup failed.';
+        console.error(err);
+        this.error = err?.error?.message || 'Signup failed. Please try again.';
       }
     });
   }

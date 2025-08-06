@@ -3,33 +3,14 @@
     <h2>Sign Up</h2>
 
     <form (ngSubmit)="signup()" #signupForm="ngForm">
-      <input
-        type="text"
-        name="name"
-        [(ngModel)]="name"
-        placeholder="Full Name"
-        required
-      />
-
-      <input
-        type="email"
-        name="email"
-        [(ngModel)]="email"
-        placeholder="Email"
-        required
-      />
-
-      <input
-        type="password"
-        name="password"
-        [(ngModel)]="password"
-        placeholder="Password"
-        required
-        minlength="6"
-      />
-
+      <input type="text" name="name" [(ngModel)]="name" placeholder="Full Name" required />
+      <input type="email" name="email" [(ngModel)]="email" placeholder="Email" required />
+      <input type="password" name="password" [(ngModel)]="password" placeholder="Password" required minlength="6" />
       <button type="submit" [disabled]="signupForm.invalid">Register</button>
     </form>
+
+    <div *ngIf="error" class="text-danger">{{ error }}</div>
+    <div *ngIf="message" class="text-success">{{ message }}</div>
 
     <div class="switch-link">
       Already have an account? <a [routerLink]="'/login'">Login</a>
