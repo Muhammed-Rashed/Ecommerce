@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken'); // Add this missing import
 const User = require('../models/User');
 
 exports.getProfile = async (req, res) => {
@@ -9,6 +10,7 @@ exports.getProfile = async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch profile' });
   }
 };
+
 exports.updateProfile = async (req, res) => {
   const { name, password, oldPassword } = req.body;
 
@@ -24,13 +26,27 @@ exports.updateProfile = async (req, res) => {
 
     if (name) user.name = name;
     if (password) {
-      user.password = await bcrypt.hash(password, 10);
+      user.password = password; // Will be hashed by pre-save hook
     }
 
     await user.save();
 
+    // Generate new token
+    const token = jwt.sign(
+      { 
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        isVerified: user.isVerified 
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
+
     res.json({
       message: 'Profile updated successfully',
+      token, // Send new token to client
       user: {
         id: user._id,
         name: user.name,

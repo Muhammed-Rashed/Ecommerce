@@ -2,15 +2,19 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../services/admin.service';
+import { AuthService } from '../../services/auth.service';
+import { AdminUserCartComponent } from '../admin-user-cart/admin-user-cart.component';
 
 @Component({
   selector: 'app-admin-users',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AdminUserCartComponent],
   templateUrl: './admin-users.component.html',
   styleUrls: ['./admin-users.component.css']
 })
 export class AdminUsersComponent implements OnInit {
+  userCartItems: { [userId: string]: any[] } = {};
+  selectedCartUserId: string | null = null;
   users: any[] = [];
   filteredUsers: any[] = [];
   searchName = '';
@@ -25,9 +29,14 @@ export class AdminUsersComponent implements OnInit {
   errorMessage = '';
   successMessage = '';
 
-  constructor(private adminService: AdminService) {}
+  constructor(private adminService: AdminService,
+    private authService: AuthService
+  ) {}
 
+  currentUserId: string | null = null;
   ngOnInit(): void {
+    const user = this.authService.getCurrentUser();
+    this.currentUserId = user?.id || null;
     this.loadUsers();
   }
 
@@ -135,42 +144,132 @@ export class AdminUsersComponent implements OnInit {
   }
 
   updateUser(user: any): void {
+    // Validation
     if (!user._id) {
       this.errorMessage = 'Cannot update user: missing ID';
       return;
     }
 
+    if (!user.name?.trim() || !user.email?.trim()) {
+      this.errorMessage = 'Name and email are required';
+      return;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(user.email)) {
+      this.errorMessage = 'Please enter a valid email address';
+      return;
+    }
+
     this.isLoading = true;
     this.errorMessage = '';
+    this.successMessage = '';
+
+    // Prepare update data - only send fields that can be updated
+    const updateData = {
+      name: user.name.trim(),
+      email: user.email.trim(),
+      role: user.role,
+      isVerified: user.isVerified
+    };
     
-    this.adminService.updateUser(user._id, user).subscribe({
-      next: () => {
+    this.adminService.updateUser(user._id, updateData).subscribe({
+      next: (response) => {
         this.successMessage = 'User updated successfully!';
         this.isLoading = false;
+        
+        // Update the user in the local array with the response data
+        const index = this.users.findIndex(u => u._id === user._id);
+        if (index !== -1 && response.user) {
+          this.users[index] = { ...this.users[index], ...response.user };
+          this.searchUsers(); // Refresh filtered users
+        }
+        
         setTimeout(() => this.successMessage = '', 3000);
       },
       error: (error) => {
         console.error('Error updating user:', error);
-        this.errorMessage = error.error?.message || 'Failed to update user';
+        this.errorMessage = this.getErrorMessage(error);
         this.isLoading = false;
       }
     });
   }
 
   toggleUserStatus(user: any): void {
+    if (!user._id) {
+      this.errorMessage = 'Cannot update user: missing ID';
+      return;
+    }
+
     const originalStatus = user.isVerified;
-    user.isVerified = !user.isVerified;
+    const newStatus = !user.isVerified;
     
-    this.adminService.updateUser(user._id, user).subscribe({
+    // Optimistically update UI
+    user.isVerified = newStatus;
+    
+    // Prepare minimal update data
+    const updateData = {
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      isVerified: newStatus
+    };
+    
+    this.adminService.updateUser(user._id, updateData).subscribe({
       next: () => {
-        this.successMessage = `User ${user.isVerified ? 'verified' : 'unverified'} successfully!`;
+        this.successMessage = `User ${newStatus ? 'verified' : 'unverified'} successfully!`;
         setTimeout(() => this.successMessage = '', 3000);
       },
       error: (error) => {
         console.error('Error updating user status:', error);
-        this.errorMessage = error.error?.message || 'Failed to update user status';
-        user.isVerified = originalStatus; // Revert on error
+        this.errorMessage = this.getErrorMessage(error);
+        // Revert the optimistic update
+        user.isVerified = originalStatus;
       }
     });
   }
+
+  private getErrorMessage(error: any): string {
+    if (error.error?.message) {
+      return error.error.message;
+    }
+    if (error.error?.errors && Array.isArray(error.error.errors)) {
+      return error.error.errors.join(', ');
+    }
+    if (error.status === 400) {
+      return 'Invalid data provided';
+    }
+    if (error.status === 404) {
+      return 'User not found';
+    }
+    if (error.status === 500) {
+      return 'Server error occurred';
+    }
+    return 'Failed to update user';
+  }
+
+  viewUserCart(userId: string): void {
+    if (this.selectedCartUserId === userId) {
+      this.selectedCartUserId = null; // collapse if already selected
+      return;
+    }
+
+    this.selectedCartUserId = userId;
+    this.errorMessage = '';
+
+    // If cart already loaded, no need to fetch again
+    if (this.userCartItems[userId]) return;
+
+    this.adminService.getCartItemsByUserId(userId).subscribe({
+      next: (cartItems) => {
+        this.userCartItems[userId] = cartItems;
+      },
+      error: (error) => {
+        console.error('Error loading user cart:', error);
+        this.errorMessage = error.error?.message || 'Failed to load user cart';
+      }
+    });
+  }
+
 }

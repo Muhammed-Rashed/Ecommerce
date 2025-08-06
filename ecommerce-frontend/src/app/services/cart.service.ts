@@ -33,11 +33,21 @@ export class CartService {
       headers: this.getHeaders()
     });
   }
+  getCartItemsByUserId(userId: string): Observable<CartItem[]> {
+    return this.http.get<CartItem[]>(`http://localhost:5000/admin/users/${userId}/cart`, {
+      headers: this.getHeaders()
+    });
+  }
 
   addToCart(productId: string, quantity: number = 1): Observable<CartItem> {
     return this.http.post<CartItem>(`${this.baseUrl}/add`, { productId, quantity }, {
       headers: this.getHeaders()
     });
+  }
+
+  getQuantityForProduct(productId: string): number {
+    const item = this.cartItemsSubject.value.find(i => i.product?._id === productId);
+    return item ? item.quantity : 0;
   }
 
   updateCartItem(productId: string, quantity: number): Observable<CartItem> {

@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Product = require('../models/Product');
+const Cart = require('../models/Cart');
 
 // Enhanced User Controllers
 exports.getAllUsers = async (req, res) => {
@@ -117,6 +118,69 @@ exports.deleteUser = async (req, res) => {
   } catch (error) {
     console.error('Error deleting user:', error);
     res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+exports.getUserCart = async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    const cart = await Cart.findOne({ userId }).populate({
+      path: 'items.productId',
+      select: 'name price'
+    });
+
+    if (!cart) return res.status(200).json([]);
+
+    const formattedItems = cart.items.map(item => ({
+      product: item.productId, // now includes name and price
+      quantity: item.quantity,
+      userId: cart.userId
+    }));
+
+    res.status(200).json(formattedItems);
+  } catch (error) {
+    console.error('Error fetching user cart:', error);
+    res.status(500).json({ message: 'Server error while fetching user cart' });
+  }
+};
+
+exports.updateUserCartItem = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { productId, quantity } = req.body;
+
+    const cart = await Cart.findOne({ userId });
+    if (!cart) return res.status(404).json({ message: 'Cart not found' });
+
+    const item = cart.items.find(i => i.productId.toString() === productId);
+    if (!item) return res.status(404).json({ message: 'Item not found in cart' });
+
+    item.quantity = quantity;
+    await cart.save();
+
+    res.json({ message: 'Cart updated successfully' });
+  } catch (error) {
+    console.error('Error updating cart:', error);
+    res.status(500).json({ message: 'Server error while updating cart' });
+  }
+};
+
+exports.removeUserCartItem = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const productId = req.params.productId;
+
+    const cart = await Cart.findOne({ userId });
+    if (!cart) return res.status(404).json({ message: 'Cart not found' });
+
+    cart.items = cart.items.filter(item => item.productId.toString() !== productId);
+    await cart.save();
+
+    res.json({ message: 'Item removed from cart' });
+  } catch (error) {
+    console.error('Error removing item from cart:', error);
+    res.status(500).json({ message: 'Server error while removing cart item' });
   }
 };
 

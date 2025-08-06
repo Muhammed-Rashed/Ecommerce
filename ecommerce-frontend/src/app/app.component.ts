@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, NavigationEnd } from '@angular/router';
-import { RouterOutlet } from '@angular/router';
+import { Router, NavigationEnd, RouterModule, RouterOutlet } from '@angular/router'; // ✅ Add RouterModule
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { filter } from 'rxjs/operators';
 
@@ -9,7 +8,8 @@ import { filter } from 'rxjs/operators';
   selector: 'app-root',
   standalone: true,
   imports: [
-    CommonModule, // For *ngIf
+    CommonModule,
+    RouterModule,
     RouterOutlet,
     NavbarComponent
   ],
@@ -27,7 +27,7 @@ export class AppComponent {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: NavigationEnd) => {
-      this.showNavbar = !['/login', '/signup'].includes(event.url);
+      this.showNavbar = !['/login', '/register'].includes(event.url);
     });
   }
 }

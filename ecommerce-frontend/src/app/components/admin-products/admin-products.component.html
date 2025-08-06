@@ -1,71 +1,136 @@
-<div class="container">
-  <h2>Manage Products</h2>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
 
-  <!-- Search and Filter Section -->
-  <div class="card mb-4">
-    <div class="card-body">
-      <div class="row">
-        <div class="col-md-8">
-          <div class="input-group">
-            <input
-              type="text"
-              class="form-control"
-              placeholder="Search by name or price..."
-              [(ngModel)]="searchName"
-              (input)="searchProducts()"
-              name="searchName">
-            <button 
-              class="btn btn-outline-secondary" 
-              type="button" 
-              (click)="clearSearch()"
-              *ngIf="searchName">
-              <i class="fas fa-times"></i>
-            </button>
-            <button 
-              class="btn btn-primary" 
-              type="button" 
-              (click)="searchProducts()">
-              <i class="fas fa-search"></i> Search
-            </button>
+      <!-- Title -->
+      <h2 class="mb-4">
+        <i class="fas fa-boxes"></i> Manage Products
+      </h2>
+
+      <!-- Search Section -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-8">
+              <div class="input-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="🔍 Search by name or price..."
+                  [(ngModel)]="searchName"
+                  (input)="searchProducts()"
+                  name="searchName">
+                <button 
+                  class="btn btn-outline-secondary" 
+                  type="button" 
+                  (click)="clearSearch()"
+                  *ngIf="searchName">
+                  <i class="fas fa-times"></i>
+                </button>
+                <button 
+                  class="btn btn-primary" 
+                  type="button" 
+                  (click)="searchProducts()">
+                  <i class="fas fa-search"></i> Search
+                </button>
+              </div>
+            </div>
+            <div class="col-md-4 text-end">
+              <button class="btn btn-success" (click)="loadProducts()">
+                <i class="fas fa-sync-alt"></i> Refresh
+              </button>
+            </div>
           </div>
         </div>
-        <div class="col-md-4 text-end">
-          <button class="btn btn-success" (click)="loadProducts()">
-            <i class="fas fa-sync-alt"></i> Refresh
-          </button>
+      </div>
+
+      <!-- Add Product Form -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">
+            <i class="fas fa-plus-circle"></i> Add New Product
+          </h5>
+        </div>
+        <div class="card-body">
+          <form (ngSubmit)="addProduct()" class="row g-3">
+            <div class="col-md-3">
+              <input [(ngModel)]="newProduct.name" name="name" class="form-control" placeholder="Product Name" required>
+            </div>
+            <div class="col-md-3">
+              <input [(ngModel)]="newProduct.image" name="image" class="form-control" placeholder="Image URL">
+            </div>
+            <div class="col-md-2">
+              <input [(ngModel)]="newProduct.price" name="price" class="form-control" type="number" placeholder="Price" required>
+            </div>
+            <div class="col-md-2">
+              <input [(ngModel)]="newProduct.category" name="category" class="form-control" placeholder="Category">
+            </div>
+            <div class="col-md-2">
+              <input [(ngModel)]="newProduct.barId" name="barId" class="form-control" placeholder="Bar ID">
+            </div>
+            <div class="col-md-2">
+              <input [(ngModel)]="newProduct.quantity" name="quantity" class="form-control" type="number" placeholder="Qty" required>
+            </div>
+            <div class="col-md-1">
+              <button class="btn btn-primary w-100" [disabled]="!newProduct.name || !newProduct.price || !newProduct.quantity">
+                <i class="fas fa-plus"></i>
+              </button>
+            </div>
+          </form>
         </div>
       </div>
+
+      <!-- Product Table -->
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">
+            <i class="fas fa-table"></i> Products ({{ filteredProducts.length }})
+          </h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th><i class="fas fa-box"></i> Name</th>
+                  <th><i class="fas fa-image"></i> Image URL</th>
+                  <th><i class="fas fa-dollar-sign"></i> Price</th>
+                  <th><i class="fas fa-tags"></i> Category</th>
+                  <th><i class="fas fa-barcode"></i> Bar ID</th>
+                  <th><i class="fas fa-cubes"></i> Qty</th>
+                  <th><i class="fas fa-cogs"></i> Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let product of filteredProducts">
+                  <td><input [(ngModel)]="product.name" class="form-control form-control-sm"></td>
+                  <td><input [(ngModel)]="product.image" class="form-control form-control-sm"></td>
+                  <td><input [(ngModel)]="product.price" class="form-control form-control-sm" type="number"></td>
+                  <td><input [(ngModel)]="product.category" class="form-control form-control-sm"></td>
+                  <td><input [(ngModel)]="product.barId" class="form-control form-control-sm"></td>
+                  <td><input [(ngModel)]="product.quantity" class="form-control form-control-sm" type="number"></td>
+                  <td>
+                    <div class="btn-group" role="group">
+                      <button class="btn btn-sm btn-success" (click)="updateProduct(product)" title="Update">
+                        <i class="fas fa-check"></i>
+                      </button>
+                      <button class="btn btn-sm btn-danger" (click)="deleteProduct(product._id!)" title="Delete">
+                        <i class="fas fa-trash-alt"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- No Products Message -->
+      <div class="alert alert-info mt-3" *ngIf="!isLoading && filteredProducts.length === 0">
+        <i class="fas fa-info-circle"></i> No products found.
+      </div>
+
     </div>
   </div>
-
-  <form (ngSubmit)="addProduct()" class="row g-2 mb-4">
-    <div class="col-md-3"><input [(ngModel)]="newProduct.name" name="name" class="form-control" placeholder="Name"></div>
-    <div class="col-md-3"><input [(ngModel)]="newProduct.image" name="image" class="form-control" placeholder="Image"></div>
-    <div class="col-md-2"><input [(ngModel)]="newProduct.price" name="price" class="form-control" type="number" placeholder="Price"></div>
-    <div class="col-md-2"><input [(ngModel)]="newProduct.category" name="category" class="form-control" placeholder="Category"></div>
-    <div class="col-md-2"><input [(ngModel)]="newProduct.barId" name="barId" class="form-control" placeholder="Bar ID"></div>
-    <div class="col-md-2"><input [(ngModel)]="newProduct.quantity" name="quantity" class="form-control" type="number" placeholder="Qty"></div>
-    <div class="col-md-1"><button class="btn btn-primary w-100">Add</button></div>
-  </form>
-
-  <table class="table table-bordered">
-    <thead>
-      <tr>
-        <th>Name</th><th>ImageURL</th><th>Price</th><th>Category</th><th>Qty</th><th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let product of filteredProducts">
-        <td><input [(ngModel)]="product.name" class="form-control"></td>
-        <td><input [(ngModel)]="product.name" class="form-control"></td>
-        <td><input [(ngModel)]="product.price" class="form-control" type="number"></td>
-        <td><input [(ngModel)]="product.category" class="form-control"></td>
-        <td><input [(ngModel)]="product.quantity" class="form-control" type="number"></td>
-        <td>
-          <button class="btn btn-success btn-sm me-2" (click)="updateProduct(product)">Update</button>
-          <button class="btn btn-danger btn-sm" (click)="deleteProduct(product._id!)">Delete</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
 </div>

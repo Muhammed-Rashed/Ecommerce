@@ -9,14 +9,15 @@ import { SignupComponent } from './components/signup/signup.component';
 
 import { AuthGuard } from './guards/auth.guard';
 import { AdminGuard } from './guards/admin.guard';
+import { NonAdminGuard } from './guards/non-admin.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
-  { path: 'login', component: LoginComponent },
-  { path: 'register', component: SignupComponent },
+  { path: 'login', component: LoginComponent},
+  { path: 'register', component: SignupComponent},
   { path: 'products', component: ProductsComponent },
   { path: 'cart', component: CartComponent, canActivate: [AuthGuard] },
-  { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
+  { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard, NonAdminGuard] },
   { path: 'admin/products', component: AdminProductsComponent, canActivate: [AdminGuard] },
   { path: 'admin/users', component: AdminUsersComponent, canActivate: [AdminGuard] },
   { path: '**', redirectTo: '/products' }

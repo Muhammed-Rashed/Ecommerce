@@ -1,43 +1,74 @@
-<h2>Your Cart</h2>
+<div class="container mt-4">
+  <h2 class="mb-4">
+    <i class="fas fa-shopping-cart"></i> Your Cart
+  </h2>
 
-<div *ngIf="cartItems.length === 0">
-  <p>Your cart is empty.</p>
-</div>
+  <!-- Search Field -->
+  <div class="mb-3 row">
+    <div class="col-md-6">
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Search cart items..."
+        [(ngModel)]="searchQuery"
+        (input)="filterCartItems()"
+      />
+    </div>
+    <div class="col-md-6 text-end">
+      <button class="btn btn-outline-secondary" (click)="clearSearch()" *ngIf="searchQuery">
+        <i class="fas fa-times"></i> Clear
+      </button>
+    </div>
+  </div>
 
-<div *ngIf="cartItems.length > 0">
-  <table>
-    <thead>
-      <tr>
-        <th>Product</th>
-        <th>Price</th>
-        <th>Quantity</th>
-        <th>Total</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      <ng-container *ngFor="let item of cartItems">
-        <tr *ngIf="item.product">
-          <td>{{ item.product.name }}</td>
-          <td>${{ item.product.price }}</td>
-          <td>
+  <!-- Empty Cart Message -->
+  <div *ngIf="filteredCartItems.length === 0">
+    <div class="alert alert-info">
+      <i class="fas fa-info-circle"></i> No items match your search.
+    </div>
+  </div>
+
+  <!-- Cart Table -->
+  <div *ngIf="filteredCartItems.length > 0" class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Product</th>
+          <th>Price</th>
+          <th>Quantity</th>
+          <th>Total</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of filteredCartItems">
+          <td>{{ item.product?.name }}</td>
+          <td>${{ item.product?.price }}</td>
+          <td style="width: 120px;">
             <input
-              #qtyInput
               type="number"
               min="1"
+              class="form-control form-control-sm"
               [value]="item.quantity"
-              (change)="updateQuantity(item, qtyInput.value)"
+              (change)="updateQuantity(item, $event)"
             />
           </td>
-          <td>${{ item.product.price * item.quantity }}</td>
+          <td>${{ (item.product?.price ?? 0) * item.quantity }}</td>
           <td>
-            <button (click)="removeItem(item)">Remove</button>
+            <button class="btn btn-sm btn-danger" (click)="removeItem(item)">
+              <i class="fas fa-trash-alt"></i>
+            </button>
           </td>
         </tr>
-      </ng-container>
-    </tbody>
-  </table>
+      </tbody>
+    </table>
 
-  <h3>Total: ${{ getTotal() }}</h3>
-  <button (click)="clearCart()">Clear Cart</button>
+    <!-- Cart Summary -->
+    <div class="d-flex justify-content-between align-items-center mt-4">
+      <h4>Total: ${{ getTotal() }}</h4>
+      <button class="btn btn-outline-danger" (click)="clearCart()">
+        <i class="fas fa-trash"></i> Clear Cart
+      </button>
+    </div>
+  </div>
 </div>

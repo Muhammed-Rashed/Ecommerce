@@ -19,6 +19,27 @@ export class AdminService {
     });
   }
 
+  getCartItemsByUserId(userId: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/users/${userId}/cart`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  updateUserCartItem(userId: string, productId: string, quantity: number): Observable<any> {
+    return this.http.put(`${this.baseUrl}/users/${userId}/cart`, {
+      productId,
+      quantity
+    }, {
+      headers: this.getHeaders()
+    });
+  }
+
+  removeUserCartItem(userId: string, productId: string): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/users/${userId}/cart/${productId}`, {
+      headers: this.getHeaders()
+    });
+  }
+
   // User Management
   getAllUsers(): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/users`, { headers: this.getHeaders() });

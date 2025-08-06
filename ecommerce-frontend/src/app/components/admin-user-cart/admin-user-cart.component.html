@@ -1,0 +1,36 @@
+<div *ngIf="loading">Loading cart...</div>
+<div *ngIf="error" class="text-danger">{{ error }}</div>
+
+<table *ngIf="!loading && !error && cartItems.length > 0" class="table">
+  <thead>
+    <tr>
+        <th>Product</th>
+        <th>Qty</th>
+        <th>Price</th>
+        <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let item of cartItems">
+        <td>{{ item.product?.name }}</td>
+        <td>
+        <input type="number" [(ngModel)]="item.quantity" min="1" class="form-control" style="width: 80px;" />
+        </td>
+        <td>${{ item.product?.price * item.quantity }}</td>
+        <td>
+        <button (click)="updateCartItem(item)" class="btn btn-sm btn-primary">Update</button>
+        <button (click)="removeCartItem(item.product._id)" class="btn btn-sm btn-danger ms-2">Remove</button>
+        </td>
+    </tr>
+  </tbody>
+
+  <tfoot>
+        <tr>
+            <td colspan="2" class="text-end"><strong>Total</strong></td>
+            <td><strong>{{ getCartTotal() | currency }}</strong></td>
+        </tr>
+    </tfoot>
+
+</table>
+
+<div *ngIf="!loading && cartItems.length === 0">This user has an empty cart.</div>
