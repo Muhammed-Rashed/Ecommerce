@@ -166,7 +166,6 @@ export class AdminUsersComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
 
-    // Prepare update data - only send fields that can be updated
     const updateData = {
       name: user.name.trim(),
       email: user.email.trim(),
@@ -179,11 +178,10 @@ export class AdminUsersComponent implements OnInit {
         this.successMessage = 'User updated successfully!';
         this.isLoading = false;
         
-        // Update the user in the local array with the response data
         const index = this.users.findIndex(u => u._id === user._id);
         if (index !== -1 && response.user) {
           this.users[index] = { ...this.users[index], ...response.user };
-          this.searchUsers(); // Refresh filtered users
+          this.searchUsers();
         }
         
         setTimeout(() => this.successMessage = '', 3000);
@@ -224,7 +222,6 @@ export class AdminUsersComponent implements OnInit {
       error: (error) => {
         console.error('Error updating user status:', error);
         this.errorMessage = this.getErrorMessage(error);
-        // Revert the optimistic update
         user.isVerified = originalStatus;
       }
     });
@@ -251,14 +248,13 @@ export class AdminUsersComponent implements OnInit {
 
   viewUserCart(userId: string): void {
     if (this.selectedCartUserId === userId) {
-      this.selectedCartUserId = null; // collapse if already selected
+      this.selectedCartUserId = null;
       return;
     }
 
     this.selectedCartUserId = userId;
     this.errorMessage = '';
 
-    // If cart already loaded, no need to fetch again
     if (this.userCartItems[userId]) return;
 
     this.adminService.getCartItemsByUserId(userId).subscribe({
