@@ -107,7 +107,6 @@ export class AuthService {
     return isBrowser() ? localStorage.getItem('token') : null;
   }
 
-  // Optional: if you need to decode token and restore user manually
   setAuthData(token: string): void {
     if (isBrowser()) {
       localStorage.setItem('token', token);
