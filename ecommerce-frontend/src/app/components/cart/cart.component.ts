@@ -46,13 +46,13 @@ export class CartComponent implements OnInit {
 
     if (!quantity || quantity <= 0) {
       alert('Quantity must be at least 1.');
-      input.value = item.quantity.toString(); // Reset input
+      input.value = item.quantity.toString();
       return;
     }
 
     if (quantity > stock) {
       alert(`Only ${stock} items in stock.`);
-      input.value = item.quantity.toString(); // Reset input
+      input.value = item.quantity.toString();
       return;
     }
 

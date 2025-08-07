@@ -3,6 +3,7 @@ const router = express.Router();
 const { protect, adminOnly } = require('../utils/middleware/authMiddleWare');
 const adminController = require('../controllers/adminController');
 const Cart = require('../models/Cart');
+
 // Users
 router.get('/users', protect, adminOnly, adminController.getAllUsers);
 router.post('/users', protect, adminOnly, adminController.createUser);

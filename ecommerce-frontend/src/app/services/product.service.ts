@@ -46,17 +46,4 @@ export class ProductService {
     const params = new URLSearchParams(filters).toString();
     return this.http.get<Product[]>(`${this.apiUrl}/filter?${params}`);
   }
-
-  // Admin only methods
-  createProduct(product: Product): Observable<Product> {
-    return this.http.post<Product>(this.apiUrl, product, { headers: this.getHeaders() });
-  }
-
-  updateProduct(id: string, product: Product): Observable<Product> {
-    return this.http.put<Product>(`${this.apiUrl}/${id}`, product, { headers: this.getHeaders() });
-  }
-
-  deleteProduct(id: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
-  }
 }

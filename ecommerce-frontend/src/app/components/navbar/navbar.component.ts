@@ -28,19 +28,15 @@ export class NavbarComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Subscribe to cart items
     this.cartService.cartItems$.subscribe(items => {
       this.cartItemCount = items.reduce((total, item) => total + item.quantity, 0);
     });
 
-    // Subscribe to user changes and determine admin status
     this.userSub = this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
-      // Check both isAdmin and role properties for admin access
       this.isAdmin = !!(user?.isAdmin || user?.role === 'admin');
     });
 
-    // Refresh cart if user is logged in
     if (this.authService.isLoggedIn()) {
       this.cartService.refreshCart();
     }
@@ -56,7 +52,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.authService.logout();
   }
 
-  // Helper method to check if user is logged in
   isLoggedIn(): boolean {
     return this.authService.isLoggedIn();
   }

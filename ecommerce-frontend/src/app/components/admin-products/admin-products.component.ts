@@ -21,7 +21,6 @@ export class AdminProductsComponent implements OnInit {
     category: '',
     quantity: 0,
     price: 0,
-    barId: '',
     inStock: true
   };
   isLoading = false;

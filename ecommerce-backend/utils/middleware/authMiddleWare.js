@@ -39,7 +39,7 @@ const protect = async (req, res, next) => {
       });
     }
 
-    // Check if user account is verified
+    // Check if user is verified
     if (!user.isVerified) {
       return res.status(401).json({ 
         message: 'Access denied. Please verify your email address.',
@@ -85,7 +85,7 @@ const protect = async (req, res, next) => {
 };
 
 const adminOnly = (req, res, next) => {
-  // Check if user exists (should be set by protect middleware)
+  // Check if user exists
   if (!req.user) {
     return res.status(401).json({ 
       message: 'Access denied. Authentication required.',
@@ -93,8 +93,8 @@ const adminOnly = (req, res, next) => {
     });
   }
 
-  // Check if user has admin privileges (check both role and isAdmin for compatibility)
-  const isAdmin = req.user.role === 'admin' || req.user.isAdmin === true;
+  // Check if user has admin privileges
+  const isAdmin = req.user.role === 'admin';
   
   if (!isAdmin) {
     return res.status(403).json({ 
@@ -106,27 +106,8 @@ const adminOnly = (req, res, next) => {
   next();
 };
 
-// Optional: Middleware to check if user is verified
-const verifiedOnly = (req, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ 
-      message: 'Access denied. Authentication required.',
-      code: 'NO_USER'
-    });
-  }
-
-  if (!req.user.isVerified) {
-    return res.status(403).json({ 
-      message: 'Access denied. Email verification required.',
-      code: 'EMAIL_NOT_VERIFIED'
-    });
-  }
-
-  next();
-};
-
-// Optional: Middleware to check if user owns resource or is admin
-const ownerOrAdmin = (req, res, next) => {
+// User or Admin
+const userOrAdmin = (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({ 
       message: 'Access denied. Authentication required.',
@@ -135,9 +116,9 @@ const ownerOrAdmin = (req, res, next) => {
   }
 
   const isAdmin = req.user.role === 'admin' || req.user.isAdmin === true;
-  const isOwner = req.user._id.toString() === req.params.id || req.user._id.toString() === req.params.userId;
+  const isUser = req.user._id.toString() === req.params.id || req.user._id.toString() === req.params.userId;
 
-  if (!isAdmin && !isOwner) {
+  if (!isAdmin && !isUser) {
     return res.status(403).json({ 
       message: 'Access denied. You can only access your own resources.',
       code: 'ACCESS_DENIED'
@@ -150,6 +131,5 @@ const ownerOrAdmin = (req, res, next) => {
 module.exports = { 
   protect, 
   adminOnly, 
-  verifiedOnly, 
-  ownerOrAdmin 
+  userOrAdmin 
 };

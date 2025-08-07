@@ -16,7 +16,7 @@
     <button 
       (click)="addToCart()"
       [disabled]="product.quantity === 0 || addedToCart || adding">
-      {{ addedToCart ? 'Added ✅' : (adding ? 'Adding...' : 'Add to Cart') }}
+      {{ addedToCart ? 'Added' : (adding ? 'Adding...' : 'Add to Cart') }}
     </button>
 
     <div *ngIf="message" class="mt-2">

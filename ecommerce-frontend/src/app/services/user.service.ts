@@ -40,23 +40,6 @@ export class UserService {
     return this.http.delete(`${this.apiUrl}/profile`, { headers: this.getHeaders() });
   }
 
-  // Admin only methods
-  getAllUsers(): Observable<User[]> {
-    return this.http.get<User[]>(this.apiUrl, { headers: this.getHeaders() });
-  }
-
-  getUserById(id: string): Observable<User> {
-    return this.http.get<User>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
-  }
-
-  updateUser(id: string, userData: Partial<User>): Observable<User> {
-    return this.http.put<User>(`${this.apiUrl}/${id}`, userData, { headers: this.getHeaders() });
-  }
-
-  deleteUser(id: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
-  }
-
   createUser(userData: User): Observable<User> {
     return this.http.post<User>(this.apiUrl, userData, { headers: this.getHeaders() });
   }

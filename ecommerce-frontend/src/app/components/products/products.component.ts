@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ProductService, Product } from '../../services/product.service';
 import { ProductCardComponent } from '../product-card/product-card.component';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; // ✅ Needed for [(ngModel)]
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-products',
